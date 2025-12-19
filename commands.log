@@ -1,0 +1,22 @@
+node -v
+npm install newman
+newman run C:\Users\vimal_uuumpag\OneDrive\Desktop\CESLTD.postman_collection.json
+newman -v
+newman
+npm install -g newman
+newman run C:\Users\vimal_uuumpag\OneDrive\Desktop\CESLTD.postman_collection.json
+newman run C:\Users\vimal_uuumpag\OneDrive\Desktop\CESLTD.postman_collection.json --env-var baseurl=https://api.restful-api.dev/
+newman run C:\Users\vimal_uuumpag\OneDrive\Desktop\CESLTD.postman_collection.json --env-var "baseurl=https://api.restful-api.dev/"
+newman run C:\Users\vimal_uuumpag\OneDrive\Desktop\CESLTD.postman_collection.json --env-var baseURL=https://api.restful-api.dev/
+newman run C:\Users\vimal_uuumpag\OneDrive\Desktop\CESLTD.postman_collection.json --env-var baseURL=https://api.restful-api.dev/ -r html
+npm install newman-reporter-html
+npm install -g newman-reporter-htmlextra
+newman run C:\Users\vimal_uuumpag\OneDrive\Desktop\CESLTD.postman_collection.json --env-var baseURL=https://api.restful-api.dev/ -r htmlextra
+newman run C:\Users\vimal_uuumpag\OneDrive\Desktop\CESLTD.postman_collection.json --env-var baseURL=https://api.restful-api.dev/ -r htmlextra --reporter-htmlextra-export report.html
+newman run C:\Users\vimal_uuumpag\OneDrive\Desktop\CESLTD.postman_collection.json --env-var baseURL=https://api.restful-api.dev/  --reporter-htmlextra-export report.html
+ollama list
+ollama run deepseek-r1:7b
+ollama run deepseek-r1
+newman run C:\Users\vimal_uuumpag\OneDrive\Desktop\CESLTD.postman_collection.json --env-var baseURL=https://api.restful-api.dev/  --reporter-htmlextra-export report.html --folder getall
+newman_commands.log
+doskey /history > commands.log
