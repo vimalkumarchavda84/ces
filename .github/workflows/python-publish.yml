@@ -27,7 +27,7 @@ jobs:
         run: |
           # example: collection and environment in repo root
           newman run ./collections/my-collection.json \
-            -e ./environments/my-environment.json \
+            -e ./QA.postman.environment.json \
             --reporters cli,junit,html \
             --reporter-junit-export results/newman-report.xml \
             --reporter-html-export results/newman-report.html \
