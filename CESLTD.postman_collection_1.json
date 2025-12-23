@@ -1,0 +1,542 @@
+{
+	"info": {
+		"_postman_id": "07c8976a-309b-44b5-a137-a40a60ceb096",
+		"name": "CESLTD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "50764830",
+		"_collection_link": "https://vimalkumar-chavda84-5600799.postman.co/workspace/-CESltd~f0c9e582-6819-440b-8990-a01f154ecd7d/collection/50764830-07c8976a-309b-44b5-a137-a40a60ceb096?action=share&source=collection_link&creator=50764830"
+	},
+	"item": [
+		{
+			"name": "getall",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// ============================================================",
+							"// POST-RESPONSE SCRIPT FOR \"getall\" REQUEST",
+							"// Purpose: Parse the response, extract all object IDs, store them",
+							"//          in collection variables, and set up iteration to \"getone\"",
+							"// ============================================================",
+							"",
+							"// Step 1: Verify that the getall request was successful",
+							"pm.test(\"getall - Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"getall - Response time is under 1500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+							"});",
+							"",
+							"// Step 2: Parse the JSON response",
+							"const jsonData = pm.response.json();",
+							"",
+							"// Step 3: Extract the array of objects from the response",
+							"// The API might return an array directly, or an object with \"items\" or \"data\" property",
+							"let objectsArray = [];",
+							"",
+							"if (Array.isArray(jsonData)) {",
+							"    // Response is directly an array",
+							"    objectsArray = jsonData;",
+							"} else if (jsonData.items && Array.isArray(jsonData.items)) {",
+							"    // Response has an \"items\" property containing the array",
+							"    objectsArray = jsonData.items;",
+							"} else if (jsonData.data && Array.isArray(jsonData.data)) {",
+							"    // Response has a \"data\" property containing the array",
+							"    objectsArray = jsonData.data;",
+							"}",
+							"",
+							"pm.test(\"getall - Response contains an array of objects\", function () {",
+							"    pm.expect(objectsArray.length).to.be.greaterThan(0);",
+							"});",
+							"",
+							"// Step 4: Extract all IDs from the objects array",
+							"// Assumes each object has an \"id\" property",
+							"const allIds = objectsArray.map(obj => obj.id);",
+							"",
+							"console.log(\"Extracted IDs from getall response:\", allIds);",
+							"",
+							"// Step 5: Store the IDs and full objects in collection variables for reuse",
+							"// - \"allObjectIds\": JSON string of all IDs to iterate through",
+							"// - \"allObjects\": JSON string of full objects (optional, for reference)",
+							"// - \"currentIndex\": Tracks which ID we're currently testing (starts at 0)",
+							"pm.collectionVariables.set(\"allObjectIds\", JSON.stringify(allIds));",
+							"pm.collectionVariables.set(\"allObjects\", JSON.stringify(objectsArray));",
+							"pm.collectionVariables.set(\"currentIndex\", 0);",
+							"",
+							"// Step 6: Check if there are IDs to process",
+							"if (allIds.length > 0) {",
+							"    // Set the first ID to the \"id\" variable for the getone request",
+							"    pm.collectionVariables.set(\"id\", allIds[0]);",
+							"    ",
+							"    // Tell Postman to run \"getone\" next",
+							"    pm.execution.setNextRequest(\"getone\");",
+							"    ",
+							"    console.log(\"Starting iteration. First ID to test:\", allIds[0]);",
+							"} else {",
+							"    // No IDs found, stop the collection run",
+							"    console.log(\"No IDs found in getall response. Stopping collection run.\");",
+							"    pm.execution.setNextRequest(null);",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{baseURL}}objects"
+			},
+			"response": []
+		},
+		{
+			"name": "getone",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// ============================================================",
+							"// POST-RESPONSE SCRIPT FOR \"getone\" REQUEST",
+							"// Purpose: Validate the response for the current ID, then move",
+							"//          to the next ID or stop the collection run when done",
+							"// ============================================================",
+							"",
+							"// Step 1: Get the current ID being tested (for validation)",
+							"const currentId = pm.collectionVariables.get(\"id\");",
+							"",
+							"// Step 2: Basic response validations",
+							"pm.test(\"getone - Status code is 200 for ID: \" + currentId, function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"getone - Response time is under 1500ms for ID: \" + currentId, function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+							"});",
+							"",
+							"// Step 3: Parse the response and validate structure",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"getone - Response body is not empty for ID: \" + currentId, function () {",
+							"    pm.expect(jsonData).to.not.be.null;",
+							"    pm.expect(jsonData).to.not.be.undefined;",
+							"});",
+							"",
+							"",
+							"// Step 4: Move to the next ID or stop the collection run",
+							"// Retrieve the list of all IDs and the current index",
+							"const allIds = JSON.parse(pm.collectionVariables.get(\"allObjectIds\") || \"[]\");",
+							"let currentIndex = parseInt(pm.collectionVariables.get(\"currentIndex\") || \"0\");",
+							"",
+							"// Increment the index to move to the next ID",
+							"currentIndex++;",
+							"",
+							"console.log(\"Completed testing ID:\", currentId, \"| Next index:\", currentIndex, \"of\", allIds.length);",
+							"",
+							"// Step 5: Check if there are more IDs to process",
+							"if (currentIndex < allIds.length) {",
+							"    // There are more IDs to test",
+							"    // Update the index in collection variables",
+							"    pm.collectionVariables.set(\"currentIndex\", currentIndex);",
+							"    ",
+							"    // Set the next ID to the \"id\" variable",
+							"    const nextId = allIds[currentIndex];",
+							"    pm.collectionVariables.set(\"id\", nextId);",
+							"    ",
+							"    // Tell Postman to run \"getone\" again for the next ID",
+							"    pm.execution.setNextRequest(\"getone\");",
+							"    ",
+							"    console.log(\"Moving to next ID:\", nextId);",
+							"} else {",
+							"    // All IDs have been tested - stop the collection run cleanly",
+							"    console.log(\"All IDs have been tested successfully! Stopping collection run.\");",
+							"    ",
+							"    // Clean up collection variables (optional)",
+							"    // pm.collectionVariables.unset(\"allObjectIds\");",
+							"    // pm.collectionVariables.unset(\"allObjects\");",
+							"    // pm.collectionVariables.unset(\"currentIndex\");",
+							"    ",
+							"    // Setting next request to null stops the collection runner",
+							"    pm.execution.setNextRequest(null);",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.variables.get(\"ids\");\r",
+							"console.log('GET IDS from FIRST APICALL',pm.variables.get(\"ids\"))"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}objects?id=1",
+					"host": [
+						"{{baseURL}}objects"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getIDthree",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}objects?id=3",
+					"host": [
+						"{{baseURL}}objects"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getsecondID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}objects?id=2",
+					"host": [
+						"{{baseURL}}objects"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get API Post Response Validation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// ============================================================",
+							"// POST-RESPONSE SCRIPT FOR \"getone\" REQUEST",
+							"// Purpose: Validate the response for the current ID, then move",
+							"//          to the next ID or stop the collection run when done",
+							"// ============================================================",
+							"",
+							"// Step 1: Get the current ID being tested (for validation)",
+							"const currentId = pm.collectionVariables.get(\"id\");",
+							"",
+							"// Step 2: Basic response validations",
+							"pm.test(\"getone - Status code is 200 for ID: \" + currentId, function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"getone - Response time is under 1500ms for ID: \" + currentId, function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+							"});",
+							"",
+							"// Step 3: Parse the response and validate structure",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"getone - Response body is not empty for ID: \" + currentId, function () {",
+							"    pm.expect(jsonData).to.not.be.null;",
+							"    pm.expect(jsonData).to.not.be.undefined;",
+							"});",
+							"",
+							"",
+							"// Step 4: Move to the next ID or stop the collection run",
+							"// Retrieve the list of all IDs and the current index",
+							"const allIds = JSON.parse(pm.collectionVariables.get(\"allObjectIds\") || \"[]\");",
+							"let currentIndex = parseInt(pm.collectionVariables.get(\"currentIndex\") || \"0\");",
+							"",
+							"// Increment the index to move to the next ID",
+							"currentIndex++;",
+							"",
+							"console.log(\"Completed testing ID:\", currentId, \"| Next index:\", currentIndex, \"of\", allIds.length);",
+							"",
+							"// Step 5: Check if there are more IDs to process",
+							"if (currentIndex < allIds.length) {",
+							"    // There are more IDs to test",
+							"    // Update the index in collection variables",
+							"    pm.collectionVariables.set(\"currentIndex\", currentIndex);",
+							"    ",
+							"    // Set the next ID to the \"id\" variable",
+							"    const nextId = allIds[currentIndex];",
+							"    pm.collectionVariables.set(\"id\", nextId);",
+							"    ",
+							"    // Tell Postman to run \"getone\" again for the next ID",
+							"    pm.execution.setNextRequest(\"getone\");",
+							"    ",
+							"    console.log(\"Moving to next ID:\", nextId);",
+							"} else {",
+							"    // All IDs have been tested - stop the collection run cleanly",
+							"    console.log(\"All IDs have been tested successfully! Stopping collection run.\");",
+							"    ",
+							"    // Clean up collection variables (optional)",
+							"    // pm.collectionVariables.unset(\"allObjectIds\");",
+							"    // pm.collectionVariables.unset(\"allObjects\");",
+							"    // pm.collectionVariables.unset(\"currentIndex\");",
+							"    ",
+							"    // Setting next request to null stops the collection runner",
+							"    pm.execution.setNextRequest(null);",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}objects?id={{id}}",
+					"host": [
+						"{{baseURL}}objects"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}objects?id={{id}}",
+					"host": [
+						"{{baseURL}}objects"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PostRequestMock",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Generate random number between 4000 and 8000\r",
+							"let min = 4000;\r",
+							"let max = 8000;\r",
+							"let randomValue = Math.floor(Math.random() * (max - min + 1)) + min;\r",
+							"\r",
+							"// Save it as an environment variable\r",
+							"pm.environment.set(\"dynamicValue\", randomValue);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"item\":\"iphone 15\",\r\n\"price\":{{dynamicValue}}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3000/ids"
+			},
+			"response": []
+		},
+		{
+			"name": "getIDsMockServer",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:3000/ids/f994"
+			},
+			"response": []
+		},
+		{
+			"name": "deleteMock",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "http://localhost:3000/ids/f994"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "allObjectIds",
+			"value": ""
+		},
+		{
+			"key": "allObjects",
+			"value": ""
+		},
+		{
+			"key": "currentIndex",
+			"value": ""
+		},
+		{
+			"key": "id",
+			"value": ""
+		}
+	]
+}
