@@ -26,8 +26,8 @@ jobs:
           API_TOKEN: ${{ secrets.API_TOKEN }}   # optional secret example
         run: |
           # example: collection and environment in repo root
-          newman run ./collections/my-collection.json \
-            -e QA.postman.environment.json \
+          newman run ./CESLTD.postman_collection.json \
+            -e ./QA.postman.environment.json \
             --reporters cli,junit,html \
             --reporter-junit-export results/newman-report.xml \
             --reporter-html-export results/newman-report.html \
