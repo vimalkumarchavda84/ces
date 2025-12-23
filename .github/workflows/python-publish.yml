@@ -1,0 +1,40 @@
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  run-postman-collection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install newman and reporters
+        run: npm install -g newman newman-reporter-html
+
+      - name: Create results directory
+        run: mkdir -p results
+
+      - name: Run Postman collection with newman
+        env:
+          API_TOKEN: ${{ secrets.API_TOKEN }}   # optional secret example
+        run: |
+          # example: collection and environment in repo root
+          newman run ./collections/my-collection.json \
+            -e ./environments/my-environment.json \
+            --reporters cli,junit,html \
+            --reporter-junit-export results/newman-report.xml \
+            --reporter-html-export results/newman-report.html \
+            --env-var "token=${{ secrets.API_TOKEN }}"   # optional inline secret
+
+      - name: Upload Newman reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-reports
+          path: results
