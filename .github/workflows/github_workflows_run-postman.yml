@@ -19,14 +19,14 @@ jobs:
 
       - name: Install Newman and reporters
         run: |
-          npm install -g newman newman-reporter-htmlextra
+          npm install -g newman newman-reporter-html newman-reporter-htmlextra
 
       - name: Run Postman collection with Newman
         run: |
           mkdir -p reports
           # adjust the collection path if you placed it elsewhere in the repo
           newman run cartapivalidation.postman_collection.json \
-            --reporters cli, htmlextra\
+            --reporters cli, html, htmlextra\
             --reporter-html-export newman/newman-report.html \
             
 
