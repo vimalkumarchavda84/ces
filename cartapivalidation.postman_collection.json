@@ -1,0 +1,110 @@
+{
+	"info": {
+		"_postman_id": "972433bd-c280-40c7-9733-777a052825ed",
+		"name": "cartapivalidation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50764830",
+		"_collection_link": "https://vimalkumar-chavda84-5600799.postman.co/workspace/-CESltd~f0c9e582-6819-440b-8990-a01f154ecd7d/collection/50764830-972433bd-c280-40c7-9733-777a052825ed?action=share&source=collection_link&creator=50764830"
+	},
+	"item": [
+		{
+			"name": "DummyJsonExcersize",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"pm.test(\"Response is valid JSON\", function () {\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"pm.test(\"Response contains required root keys\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.all.keys(\"carts\", \"total\", \"skip\", \"limit\");\r",
+							"});\r",
+							"pm.test(\"Carts is an array\", function () {\r",
+							"    pm.expect(pm.response.json().carts).to.be.an(\"array\");\r",
+							"});\r",
+							"pm.test(\"Carts array is not empty\", function () {\r",
+							"    pm.expect(pm.response.json().carts.length).to.be.above(0);\r",
+							"});\r",
+							"pm.test(\"Each cart contains required fields\", function () {\r",
+							"    pm.response.json().carts.forEach(cart => {\r",
+							"        pm.expect(cart).to.have.property(\"id\");\r",
+							"        pm.expect(cart).to.have.property(\"products\");\r",
+							"        pm.expect(cart).to.have.property(\"total\");\r",
+							"        pm.expect(cart).to.have.property(\"discountedTotal\");\r",
+							"        pm.expect(cart).to.have.property(\"userId\");\r",
+							"        pm.expect(cart).to.have.property(\"totalProducts\");\r",
+							"        pm.expect(cart).to.have.property(\"totalQuantity\");\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Products is array inside cart\", function () {\r",
+							"    pm.response.json().carts.forEach(cart => {\r",
+							"        pm.expect(cart.products).to.be.an(\"array\");\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Each product has mandatory fields\", function () {\r",
+							"    pm.response.json().carts.forEach(cart => {\r",
+							"        cart.products.forEach(product => {\r",
+							"            pm.expect(product).to.have.property(\"id\");\r",
+							"            pm.expect(product).to.have.property(\"title\");\r",
+							"            pm.expect(product).to.have.property(\"price\");\r",
+							"            pm.expect(product).to.have.property(\"quantity\");\r",
+							"            pm.expect(product).to.have.property(\"total\");\r",
+							"        });\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Product quantity is greater than zero\", function () {\r",
+							"    pm.response.json().carts.forEach(cart => {\r",
+							"        cart.products.forEach(product => {\r",
+							"            pm.expect(product.quantity).to.be.above(0);\r",
+							"        });\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Product total = price * quantity\", function () {\r",
+							"    pm.response.json().carts.forEach(cart => {\r",
+							"        cart.products.forEach(product => {\r",
+							"            const calculatedTotal = Number(\r",
+							"                (product.price * product.quantity).toFixed(2)\r",
+							"            );\r",
+							"            const actualTotal = Number(product.total.toFixed(2));\r",
+							"\r",
+							"            pm.expect(actualTotal).to.eql(calculatedTotal);\r",
+							"        });\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Limit value should be 30\", function () {\r",
+							"    pm.expect(pm.response.json().limit).to.eql(30);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://dummyjson.com/carts",
+					"protocol": "https",
+					"host": [
+						"dummyjson",
+						"com"
+					],
+					"path": [
+						"carts"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
