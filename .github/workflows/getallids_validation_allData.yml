@@ -1,0 +1,38 @@
+name: Run Postman (Newman) and publish reports
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  run-newman:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Newman and reporters
+        run: |
+          npm install -g newman newman-reporter-html newman-reporter-htmlextra
+
+      - name: Run Postman collection with Newman
+        run: |
+          mkdir -p reports
+          # adjust the collection path if you placed it elsewhere in the repo
+          newman run DummyJson_Test_getID_all_validation.json \
+            --reporters cli,html,htmlextra \
+            --reporter-html-export newman/newman-report.html \
+            
+
+      - name: Upload HTML report (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-html-report
+          path: newman/newman-report.html
