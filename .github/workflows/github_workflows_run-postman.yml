@@ -19,16 +19,16 @@ jobs:
 
       - name: Install Newman and reporters
         run: |
-          npm install -g newman newman-reporter-html newman-reporter-junitfull
+          npm install -g newman newman-reporter-html
 
       - name: Run Postman collection with Newman
         run: |
           mkdir -p reports
           # adjust the collection path if you placed it elsewhere in the repo
           newman run cartapivalidation.postman_collection.json \
-            --reporters cli,html,junitfull \
+            --reporters cli,html \
             --reporter-html-export reports/newman-report.html \
-            --reporter-junitfull-export reports/newman-report.xml
+            
 
       - name: Upload HTML report (artifact)
         if: always()
@@ -36,18 +36,3 @@ jobs:
         with:
           name: newman-html-report
           path: reports/newman-report.html
-
-      - name: Upload JUnit XML report (artifact)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: newman-junit-report
-          path: reports/newman-report.xml
-
-      - name: Publish test report to GitHub Checks (JUnit)
-        if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          name: Newman tests
-          path: reports/newman-report.xml
-          reporter: junit
