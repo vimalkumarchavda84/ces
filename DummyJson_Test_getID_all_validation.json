@@ -1,0 +1,252 @@
+{
+	"info": {
+		"_postman_id": "5885a805-3731-4851-ac61-4ba67041c918",
+		"name": "cartapivalidation Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50764830",
+		"_collection_link": "https://vimalkumar-chavda84-5600799.postman.co/workspace/-CESltd~f0c9e582-6819-440b-8990-a01f154ecd7d/collection/50764830-5885a805-3731-4851-ac61-4ba67041c918?action=share&source=collection_link&creator=50764830"
+	},
+	"item": [
+		{
+			"name": "DummyJsonExcersize",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Store all cart IDs\", function () {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    const cartIds = jsonData.carts.map(cart => cart.id);\r",
+							"\r",
+							"    console.log(\"All Cart IDs:\", cartIds);\r",
+							"\r",
+							"    pm.collectionVariables.set(\"cartIds\", JSON.stringify(cartIds));\r",
+							"    pm.collectionVariables.set(\"currentIndex\", 0);\r",
+							"});\r",
+							"\r",
+							"// 👇 Tell Postman what to run next\r",
+							"pm.execution.setNextRequest(\"GetbyID\");"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://dummyjson.com/carts",
+					"protocol": "https",
+					"host": [
+						"dummyjson",
+						"com"
+					],
+					"path": [
+						"carts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetbyID",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let cartIds = JSON.parse(pm.collectionVariables.get(\"cartIds\"));\r",
+							"let index = Number(pm.collectionVariables.get(\"currentIndex\"));\r",
+							"console.log('current Index',index)\r",
+							"console.log(cartIds)\r",
+							"if (index < cartIds.length) {\r",
+							"    pm.collectionVariables.set(\"cartId\", cartIds[index]);\r",
+							"    console.log('getByid called for cartId: ' + cartIds[index] );\r",
+							"    pm.collectionVariables.set(\"currentIndex\", index + 1);\r",
+							"} else {\r",
+							"    console.log(\"All cart IDs executed\");\r",
+							"    pm.execution.setNextRequest(null); // stop collection\r",
+							"}\r",
+							"if (index === cartIds.length) {\r",
+							"    pm.execution.setNextRequest(null); // stop collection\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Correct cart is returned\", function () {\r",
+							"    pm.expect(pm.response.json().id)\r",
+							"        .to.eql(Number(pm.collectionVariables.get(\"cartId\")));\r",
+							"});\r",
+							"// loop ONLY if IDs are left\r",
+							"let cartIds = JSON.parse(pm.collectionVariables.get(\"cartIds\"));\r",
+							"let index = Number(pm.collectionVariables.get(\"currentIndex\"));\r",
+							"\r",
+							"if (index < cartIds.length) {\r",
+							"    pm.execution.setNextRequest(\"GetbyID\");\r",
+							"}\r",
+							"// 👇 Loop back to same request\r",
+							"//pm.execution.setNextRequest(\"GetbyID\");\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"pm.test(\"Response is valid JSON\", function () {\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"pm.test(\"Cart contains all mandatory fields\", function () {\r",
+							"    const cart = pm.response.json();\r",
+							"\r",
+							"    [\"id\",\"products\",\"total\",\"discountedTotal\",\"userId\",\"totalProducts\",\"totalQuantity\"]\r",
+							"        .forEach(field => pm.expect(cart).to.have.property(field));\r",
+							"});\r",
+							"pm.test(\"Products is a non-empty array\", function () {\r",
+							"    const cart = pm.response.json();\r",
+							"\r",
+							"    pm.expect(cart.products).to.be.an(\"array\").that.is.not.empty;\r",
+							"});\r",
+							"pm.test(\"Each product has mandatory fields\", function () {\r",
+							"    const cart = pm.response.json();\r",
+							"\r",
+							"    cart.products.forEach(product => {\r",
+							"        [\"id\",\"title\",\"price\",\"quantity\",\"total\",\"discountPercentage\",\"discountedTotal\",\"thumbnail\"]\r",
+							"            .forEach(field => pm.expect(product).to.have.property(field));\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Each product quantity is greater than zero\", function () {\r",
+							"    const cart = pm.response.json();\r",
+							"\r",
+							"    cart.products.forEach(product => {\r",
+							"        pm.expect(product.quantity).to.be.above(0);\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Product total equals price × quantity\", function () {\r",
+							"    const cart = pm.response.json();\r",
+							"\r",
+							"    cart.products.forEach(product => {\r",
+							"        const calculatedTotal = Number(\r",
+							"            (product.price * product.quantity).toFixed(2)\r",
+							"        );\r",
+							"        const actualTotal = Number(product.total.toFixed(2));\r",
+							"\r",
+							"        pm.expect(actualTotal).to.eql(calculatedTotal);\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Product discountedTotal is correctly calculated\", function () {\r",
+							"    const cart = pm.response.json();\r",
+							"\r",
+							"    cart.products.forEach(product => {\r",
+							"        const expectedDiscountedTotal = Number(\r",
+							"            (product.total * (1 - product.discountPercentage / 100)).toFixed(2)\r",
+							"        );\r",
+							"        const actualDiscountedTotal = Number(\r",
+							"            product.discountedTotal.toFixed(2)\r",
+							"        );\r",
+							"\r",
+							"        pm.expect(actualDiscountedTotal).to.eql(expectedDiscountedTotal);\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Cart total equals sum of product totals\", function () {\r",
+							"    const cart = pm.response.json();\r",
+							"\r",
+							"    const sumOfTotals = cart.products.reduce(\r",
+							"        (sum, product) => sum + product.total,\r",
+							"        0\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(Number(cart.total.toFixed(2)))\r",
+							"        .to.eql(Number(sumOfTotals.toFixed(2)));\r",
+							"});\r",
+							"pm.test(\"Product total equals price × quantity\", function () {\r",
+							"    const cart = pm.response.json();\r",
+							"\r",
+							"    cart.products.forEach(product => {\r",
+							"        const calculatedTotal = Number(\r",
+							"            (product.price * product.quantity).toFixed(2)\r",
+							"        );\r",
+							"        const actualTotal = Number(product.total.toFixed(2));\r",
+							"\r",
+							"        pm.expect(actualTotal).to.eql(calculatedTotal);\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Product total equals price × quantity\", function () {\r",
+							"    const cart = pm.response.json();\r",
+							"\r",
+							"    cart.products.forEach(product => {\r",
+							"        const calculatedTotal = Number(\r",
+							"            (product.price * product.quantity).toFixed(2)\r",
+							"        );\r",
+							"        const actualTotal = Number(product.total.toFixed(2));\r",
+							"\r",
+							"        pm.expect(actualTotal).to.eql(calculatedTotal);\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Product total equals price × quantity\", function () {\r",
+							"    const cart = pm.response.json();\r",
+							"\r",
+							"    cart.products.forEach(product => {\r",
+							"        const calculatedTotal = Number(\r",
+							"            (product.price * product.quantity).toFixed(2)\r",
+							"        );\r",
+							"        const actualTotal = Number(product.total.toFixed(2));\r",
+							"\r",
+							"        pm.expect(actualTotal).to.eql(calculatedTotal);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://dummyjson.com/carts/{{cartId}}",
+					"protocol": "https",
+					"host": [
+						"dummyjson",
+						"com"
+					],
+					"path": [
+						"carts",
+						"{{cartId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "cartIds",
+			"value": ""
+		},
+		{
+			"key": "currentIndex",
+			"value": ""
+		},
+		{
+			"key": "cartId",
+			"value": ""
+		},
+		{
+			"key": "allObjectIds",
+			"value": ""
+		}
+	]
+}
