@@ -1,4 +1,4 @@
-name: Run Postman (Newman) and publish reports
+name: DummyAPI_allCollection_run_oneByOne
 
 on:
   push:
