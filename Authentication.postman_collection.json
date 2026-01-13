@@ -1,0 +1,102 @@
+{
+	"info": {
+		"_postman_id": "b221e252-b120-48fc-9584-e5bf8e30286e",
+		"name": "Authentication",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50764830",
+		"_collection_link": "https://vimalkumar-chavda84-5600799.postman.co/workspace/-CESltd~f0c9e582-6819-440b-8990-a01f154ecd7d/collection/50764830-b221e252-b120-48fc-9584-e5bf8e30286e?action=share&source=collection_link&creator=50764830"
+	},
+	"item": [
+		{
+			"name": "login_auth_session",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('response status code validateion', function(){",
+							"    pm.response.to.have.status(200)",
+							"})",
+							"pm.test('response time is less than 1000', function(){",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000)",
+							"})",
+							"pm.test('validate access token', function(){",
+							"    pm.expect(pm.response.json().accessToken).to.not.be.null",
+							"})",
+							"pm.test('validate refresh token', function(){",
+							"    pm.expect(pm.response.json().refreshToken).to.not.be.null",
+							"})",
+							"",
+							"pm.test('validate user id', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.id).to.not.be.null;",
+							"    pm.expect(response.username).to.not.be.null;",
+							"    pm.expect(response.gender).to.not.be.null;",
+							"})",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{   \"username\": \"emilys\",\r\n    \"password\": \"emilyspass\",\r\n    \"expiresInMins\": 30 // optional, defaults to 60\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://dummyjson.com/auth/login",
+					"protocol": "https",
+					"host": [
+						"dummyjson",
+						"com"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PassToken",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJlbWlseXMiLCJlbWFpbCI6ImVtaWx5LmpvaG5zb25AeC5kdW1teWpzb24uY29tIiwiZmlyc3ROYW1lIjoiRW1pbHkiLCJsYXN0TmFtZSI6IkpvaG5zb24iLCJnZW5kZXIiOiJmZW1hbGUiLCJpbWFnZSI6Imh0dHBzOi8vZHVtbXlqc29uLmNvbS9pY29uL2VtaWx5cy8xMjgiLCJpYXQiOjE3NjgxOTYyNjksImV4cCI6MTc2ODE5ODA2OX0.QSCY3tCXPo7k5Y_m5iphgc1ejwasgo22T_rKt1eIx3w",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://dummyjson.com/auth/me",
+					"protocol": "https",
+					"host": [
+						"dummyjson",
+						"com"
+					],
+					"path": [
+						"auth",
+						"me"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
